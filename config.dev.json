@@ -24,7 +24,7 @@
     "whiteListIds": [],
     "notes": "if you enable this feature, only the ids in the whiteListIds section can use the bot"
   },
-  "nickNameBot": "➤ 『 𝙷𝙴𝙳𝙶𝙴𝙷𝙾𝙶𝄞𝙶𝙿𝚃 』☜ヅ",
+  "nickNameBot": "➤ 𝐋𝐢𝐦𝐮𝐥𝐞 𝐭𝐞𝐦𝐩𝐞𝐬𝐭 • ࿐",
   "prefix": "•",
   "database": {
     "type": "sqlite",
