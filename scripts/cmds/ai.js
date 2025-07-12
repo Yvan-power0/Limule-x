@@ -1,82 +1,121 @@
-const axios = require('axios');
+const a = require('axios');
+const b = require('valid-url');
+const c = require('fs');
+const d = require('path');
+const e = require('uuid').v4;
 
-async function fetchFromAI(url, params) {
- try {
- const response = await axios.get(url, { params });
- return response.data;
- } catch (error) {
- console.error(error);
- return null;
- }
-}
+const f = "https://orochiai.vercel.app/chat";
+const g = "https://orochiai.vercel.app/chat/clear";
+const h = d.join(__dirname, 'tmp');
+if (!c.existsSync(h)) c.mkdirSync(h);
 
-async function getAIResponse(input, userId, messageID) {
- const services = [
- { url: 'https://ai-tools.replit.app/gpt', params: { prompt: input, uid: userId } },
- { url: 'https://openaikey-x20f.onrender.com/api', params: { prompt: input } },
- { url: 'http://fi1.bot-hosting.net:6518/gpt', params: { query: input } },
- { url: 'https://ai-chat-gpt-4-lite.onrender.com/api/hercai', params: { question: input } }
- ];
-
- let response = "💠𝑹𝑰𝑴𝑼𝑹𝑼 💠\n\n  𝐏𝐨𝐬𝐞 𝐭𝐚 𝐪𝐮𝐞𝐬𝐭𝐢𝐨𝐧 𝐡𝐮𝐦𝐚𝐢𝐧 𝐣𝐞 𝐫é𝐩𝐨𝐧𝐝𝐫𝐚𝐢 𝐠𝐫â𝐜𝐞 à 𝐦𝐚 𝐜𝐨𝐦𝐩é𝐭𝐞𝐧𝐜𝐞 𝐮𝐧𝐢𝐪𝐮𝐞 (𝐠𝐫𝐚𝐧𝐝 𝐬𝐚𝐠𝐞) 🔱";
- let currentIndex = 0;
-
- for (let i = 0; i < services.length; i++) {
- const service = services[currentIndex];
- const data = await fetchFromAI(service.url, service.params);
- if (data && (data.gpt4 || data.reply || data.response)) {
- response = data.gpt4 || data.reply || data.response;
- break;
- }
- currentIndex = (currentIndex + 1) % services.length; // Move to the next service in the cycle
- }
-
- return { response, messageID };
-}
-
-module.exports = {
- config: {
- name: 'ai',
- author: 'Arn',
- role: 0,
- category: 'ai',
- shortDescription: 'ai to ask anything',
- },
- onStart: async function ({ api, event, arns }) {
- const input = args.join(' ').trim();
- if (!input) {
- api.sendMessage(``, event.threadID, event.messageID);
- return;
- }
-
-const fonts = {
-
- mathsans: {
-
- a: "𝖺", b: "𝖻", c: "𝖼", d: "𝖽", e: "𝖾", f: "𝖿", g: "𝗀", h: "𝗁", i: "𝗂",
-
- j: "𝗃", k: "𝗄", l: "𝗅", m: "𝗆", n: "𝗇", o: "𝗈", p: "𝗉", q: "𝗊", r: "𝗋",
-
- s: "𝗌", t: "𝗍", u: "𝗎", v: "𝗏", w: "𝗐", x: "𝗑", y: "𝗒", z: "𝗓",
-
- A: "𝖠", B: "𝖡", C: "𝖢", D: "𝖣", E: "𝖤", F: "𝖥", G: "𝖦", H: "𝖧", I: "𝖨",
-
- J: "𝖩", K: "𝖪", L: "𝖫", M: "𝖬", N: "𝖭", O: "𝖮", P: "𝖯", Q: "𝖰", R: "𝖱",
-
- S: "𝖲", T: "𝖳", U: "𝖴", V: "𝖵", W: "𝖶", X: "𝖷", Y: "𝖸", Z: "𝖹",
- }
+const i = async (j, k) => {
+  const l = d.join(h, `${e()}.${k}`);
+  const m = await a.get(j, { responseType: 'arraybuffer' });
+  c.writeFileSync(l, Buffer.from(m.data));
+  return l;
 };
 
- 
- const { response, messageID } = await getAIResponse(input, event.senderID, event.messageID);
- api.sendMessage(` ${response} `, event.threadID, messageID);
- },
- onChat: async function ({ event, message }) {
- const messageContent = event.body.trim().toLowerCase();
- if (messageContent.startsWith("ai")) {
- const input = messageContent.replace(/^ai\s*/, "").trim();
- const { response, messageID } = await getAIResponse(input, event.senderID, message.messageID);
- message.reply(`💧𝐋𝐈𝐌𝐔𝐋𝐄 𝐓𝐄𝐌𝐏𝐄𝐒𝐓💧\n━━━━━━━━━━━━━\n${response}`, messageID);
- }
- }
+const n = async (o, p, q) => {
+  o.setMessageReaction("♻", p.messageID, () => {}, true);
+  try {
+    await a.delete(`${g}/${p.senderID}`);
+    return q.reply(`✅ Conversation reset for UID: ${p.senderID}`);
+  } catch (r) {
+    console.error('❌ Reset Error:', r.message);
+    return q.reply("❌ Reset failed. Try again.");
+  }
+};
+
+const s = async (t, u, v, w, x = false) => {
+  const y = u.senderID;
+  let z = v, A = null;
+  t.setMessageReaction("⏳", u.messageID, () => {}, true);
+
+  if (u.messageReply) {
+    const B = u.messageReply;
+    if (B.senderID !== global.GoatBot?.botID && B.body) {
+      const C = B.body.length > 300 ? B.body.slice(0, 300) + "..." : B.body;
+      z += `\n\n📌 Reply:\n"${C}"`;
+    }
+    const D = B.attachments?.[0];
+    if (D?.type === 'photo') A = D.url;
+  }
+
+  const E = z.match(/(https?:\/\/[^\s]+)/)?.[0];
+  if (E && b.isWebUri(E)) {
+    A = E;
+    z = z.replace(E, '').trim();
+  }
+
+  if (!z && !A) {
+    t.setMessageReaction("❌", u.messageID, () => {}, true);
+    return w.reply("💬 Provide a message or image.");
+  }
+
+  try {
+    const F = await a.post(f, { uid: y, message: z, image_url: A }, { timeout: 45000 });
+    const { reply: G, image_url: H, music_data: I, shotti_data: J } = F.data;
+    let K = G || '✅ AI Response:', L = [];
+
+    if (H) try { L.push(c.createReadStream(await i(H, 'jpg'))); } catch { K += '\n🖼 Image failed.'; }
+    if (I?.downloadUrl) try { L.push(c.createReadStream(await i(I.downloadUrl, 'mp3'))); } catch { K += '\n🎵 Music failed.'; }
+    if (J?.videoUrl) try { L.push(c.createReadStream(await i(J.videoUrl, 'mp4'))); } catch { K += '\n🎬 Video failed.'; }
+
+    const M = await w.reply({ body: K, attachment: L.length > 0 ? L : undefined });
+    global.GoatBot.onReply.set(M.messageID, { commandName: 'ai', messageID: M.messageID, author: y });
+    t.setMessageReaction("✅", u.messageID, () => {}, true);
+  } catch (N) {
+    console.error("❌ API Error:", N.response?.data || N.message);
+    t.setMessageReaction("❌", u.messageID, () => {}, true);
+    let O = "⚠ AI Error:\n\n";
+    if (N.code === 'ECONNABORTED' || N.message.includes('timeout')) O += "⏱ Timeout. Try again.";
+    else if (N.response?.status === 429) O += "🚦 Too many requests. Slow down.";
+    else O += "❌ Unexpected error.";
+    return w.reply(O);
+  }
+};
+
+module.exports = {
+  config: {
+    name: 'ai',
+    aliases: [],
+    version: '1.0.0',
+    author: 'Aryan Chauhan',
+    role: 0,
+    category: 'ai',
+    longDescription: { en: 'AI chat, image gen, music/video, and reset' },
+    guide: {
+      en: `
+.ai [your message]
+• 🤖 Chat, 🎨 Image, 🎵 Music, 🎬 Video
+• Reply to image/message for context
+• Reply or type "clear" to reset
+• Say: ai [msg] (no prefix needed)
+      `
+    }
+  },
+
+  onStart: async function ({ api: a, event: b, args: c, message: d }) {
+    const e = c.join(' ').trim();
+    if (!e) return d.reply("❗ Please enter a message.");
+    if (['clear', 'reset'].includes(e.toLowerCase())) return await n(a, b, d);
+    return await s(a, b, e, d);
+  },
+
+  onReply: async function ({ api: a, event: b, Reply: c, message: d }) {
+    if (b.senderID !== c.author) return;
+    const e = b.body?.trim();
+    if (!e) return;
+    if (['clear', 'reset'].includes(e.toLowerCase())) return await n(a, b, d);
+    return await s(a, b, e, d, true);
+  },
+
+  onChat: async function ({ api: a, event: b, message: c }) {
+    const d = b.body?.trim();
+    if (!d?.toLowerCase().startsWith('ai ')) return;
+    const e = d.slice(3).trim();
+    if (!e) return;
+    return await s(a, b, e, c);
+  }
 };
